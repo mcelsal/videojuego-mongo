@@ -10,10 +10,24 @@ class PersonajeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $todosPersonajes = Personaje::all();
-        return view('personajes.index', ['personajes' => $todosPersonajes]);
+        // recogemos el filtro por nivel (campo "nivel" del formulario)
+        $nivel = $request->input('nivel');
+
+        $query = Personaje::query();
+
+        // si se ha indicado un nivel, filtramos
+        if ($nivel !== null && $nivel !== '') {
+            $query->where('level', intval($nivel));
+        }
+
+        $todosPersonajes = $query->get();
+
+        return view('personajes.index', [
+            'personajes' => $todosPersonajes,
+            'nivel'      => $nivel,
+        ]);
     }
 
     /**
@@ -54,6 +68,31 @@ class PersonajeController extends Controller
     public function update(Request $request, string $id)
     {
         //
+    }
+
+    public function updateCoins(Request $request, string $id)
+    {
+        // cambio puede ser +10 o -10
+        $change = intval($request->input('change', 0));
+
+        // Buscar personaje por su _id (Mongo)
+        $personaje = Personaje::find($id);
+
+        if (!$personaje) {
+            return redirect()->back()->with('error', 'Personaje no encontrado');
+        }
+
+        $coinsActuales = intval($personaje->coins ?? 0);
+        $nuevasCoins   = $coinsActuales + $change;
+
+        if ($nuevasCoins < 0) {
+            $nuevasCoins = 0; // evitamos negativos
+        }
+
+        $personaje->coins = $nuevasCoins;
+        $personaje->save();
+
+        return redirect()->back()->with('success', 'Monedas actualizadas');
     }
 
     /**
