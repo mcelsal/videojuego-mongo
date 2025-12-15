@@ -8,6 +8,18 @@
 
     <h1>Formulario de Login</h1>
 
+    @if(session('error'))
+        <div style="color: red; font-weight: bold;">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if(session('success'))
+        <div style="color: green; font-weight: bold;">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <form action="{{ route('login') }}" method="POST">
         @csrf
 
