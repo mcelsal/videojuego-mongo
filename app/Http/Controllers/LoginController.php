@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Usuario;
+use App\Events\FailedLoginEvent;
 
 class LoginController extends Controller
 {
@@ -27,8 +28,10 @@ class LoginController extends Controller
 
         // Comprobar password 
         if ($usuario->password !== $passwordInput) {
+            event(new FailedLoginEvent($usuario));
             return back()->with('error', 'Contraseña incorrecta');
         }
+
 
         // Si todo es correcto → lo mandamos a personajes
         return redirect()->route('personajes.index')->with(
